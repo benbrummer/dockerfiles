@@ -1,14 +1,14 @@
-ARG PHP_VERSION=8.3
+ARG PHP_VERSION=8.4
 ARG FRANKENPHP_VERSION=1
 ARG DEBIAN_VERSION=bookworm
 
 FROM dunglas/frankenphp:${FRANKENPHP_VERSION}-php${PHP_VERSION}-${DEBIAN_VERSION} AS prepare-app
 
 RUN curl -s "https://api.github.com/repos/invoiceninja/invoiceninja/releases/latest" | \
-    grep -o '"browser_download_url": "[^"]*invoiceninja.tar.gz"' | \
+    grep -o '"browser_download_url": "[^"]*invoiceninja.tar"' | \
     cut -d '"' -f 4 | \
     xargs curl -sL | \
-    tar -xz --strip-components=1 \
+    tar -xz \
     && ln -s ./resources/views/react/index.blade.php ./public/index.html \
     # Symlink
     && php artisan storage:link \
@@ -35,31 +35,17 @@ RUN setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/frankenphp
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    chromium \
     mariadb-client \
-    gpg \
     # Unicode support for PDF
     fonts-noto-cjk-extra \
     fonts-wqy-microhei \
     fonts-wqy-zenhei \
     xfonts-wqy \
-    # Install google-chrome-stable(amd64)/chromium(arm64)
-    && if [ "$(dpkg --print-architecture)" = "amd64" ]; then \
-    mkdir -p /etc/apt/keyrings \
-    && curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | \
-    gpg --dearmor -o /etc/apt/keyrings/google.gpg \
-    && echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/google.gpg] https://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends google-chrome-stable \
-    && mkdir /config/google-chrome \
-    && chown ${user}: /config/google-chrome; \
-    elif [ "$(dpkg --print-architecture)" = "arm64" ]; then \
-    apt-get install -y --no-install-recommends \
-    chromium \
+    # Create config directory for chromium
     && mkdir /config/chromium \
-    && chown ${user}: /config/chromium; \
-    fi \
+    && chown ${user}: /config/chromium \
     # Cleanup
-    && apt-get purge -y gpg \
     && apt-get autoremove -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -91,6 +77,9 @@ COPY --from=prepare-app --chown=${user}:${user} /app /app
 COPY --chmod=0755 scripts/init.sh /usr/local/bin/init.sh
 
 USER ${user}
+
+ENV IS_DOCKER=true
+ENV SNAPPDF_CHROMIUM_PATH=/usr/bin/chromium
 
 ENTRYPOINT ["/usr/local/bin/init.sh"]
 

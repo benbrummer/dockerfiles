@@ -1,4 +1,4 @@
-# name: invoiceninja
+name: invoiceninja
 
 x-logging: &default-logging
   options:
@@ -15,9 +15,6 @@ x-app-volumes: &volumes
 
 services:
   app:
-    build:
-      context: .
-      target: app
     image: invoiceninja/invoiceninja-octane:${TAG:-latest}
     restart: unless-stopped
     command: --port=80 --workers=2 --log-level=info
@@ -30,23 +27,16 @@ services:
       - ./.env
     <<: *volumes
     healthcheck:
-      start_period: 180s
+      start_period: 10s
     depends_on:
-      mysql:
+      mariadb:
         condition: service_healthy
-      redis:
+      valkey:
         condition: service_healthy
-      # mariadb:
-      #   condition: service_healthy
-      # valkey:
-      #   condition: service_healthy
     logging: *default-logging
     # tty: true
 
-  app-scheduler:
-    build:
-      context: .
-      target: scheduler
+  scheduler:
     image: invoiceninja/invoiceninja-octane-scheduler:${TAG:-latest}
     restart: unless-stopped
     command: --verbose
@@ -58,10 +48,7 @@ services:
         condition: service_healthy
     logging: *default-logging
 
-  app-worker:
-    build:
-      context: .
-      target: worker
+  worker:
     image: invoiceninja/invoiceninja-octane-worker:${TAG:-latest}
     restart: unless-stopped
     command: --verbose --sleep=3 --tries=3 --max-time=3600
@@ -76,69 +63,36 @@ services:
         condition: service_healthy
     logging: *default-logging
 
-  mysql:
-    image: mysql:8
+  mariadb:
+    image: mariadb:11.4
     restart: unless-stopped
     env_file:
       - ./.env
     environment:
-      MYSQL_DATABASE: ${DB_DATABASE}
-      MYSQL_USER: ${DB_USERNAME}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${DB_DATABASE}
+      MARIADB_USER: ${DB_USERNAME}
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     volumes:
-      - mysql_data:/var/lib/mysql
+      - mariadb:/var/lib/mysql
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u${MYSQL_USER}", "-p${MYSQL_PASSWORD}" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 10s
     logging: *default-logging
 
-  redis:
-    image: redis:alpine
+  valkey:
+    image: valkey/valkey:8
     restart: unless-stopped
     volumes:
-      - redis_data:/data
+      - valkey:/data
     healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: [ "CMD", "valkey-cli", "ping" ]
+      start_period: 10s
     logging: *default-logging
-
-  # mariadb:
-  #   image: mariadb:11.4
-  #   restart: unless-stopped
-  #   env_file:
-  #     - ./.env
-  #   environment:
-  #     MARIADB_DATABASE: ${DB_DATABASE}
-  #     MARIADB_USER: ${DB_USERNAME}
-  #     MARIADB_PASSWORD: ${DB_PASSWORD}
-  #     MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-  #   volumes:
-  #     - mariadb:/var/lib/mysql
-  #   healthcheck:
-  #     test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
-  #     start_period: 60s
-  #   logging: *default-logging
-
-  # valkey:
-  #   image: valkey/valkey:8
-  #   restart: unless-stopped
-  #   volumes:
-  #     - valkey:/data
-  #   healthcheck:
-  #     test: [ "CMD", "valkey-cli", "ping" ]
-  #     start_period: 10s
-  #   logging: *default-logging
 
 volumes:
   app_cache:
   app_storage:
   caddy_data:
-  mysql_data:
-  redis_data:
-  # mariadb:
-  # valkey:
+  mariadb:
+  valkey:
