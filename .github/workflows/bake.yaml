@@ -2,8 +2,8 @@ name: ci
 
 on:
   push:
-    paths:
-      - 'version.txt'
+    # paths:
+    #   - 'version.txt'
 
 jobs:
   bake:
@@ -12,7 +12,8 @@ jobs:
       - name: Prepare
         id: prep
         run: |
-          VERSION=$(cat version.txt)
+          ls -al
+          VERSION=$(cat ./version.txt)
           VERSION="${VERSION:1}"
           VERSION=edge
           MAJOR="$(echo "${VERSION}" | cut -d. -f1)"
