@@ -9,11 +9,17 @@ jobs:
   bake:
     runs-on: ubuntu-latest
     steps:
-      - name: Prepare
+      -
+        name: Checkout
+          uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
+      -
+        name: Prepare
         id: prep
         run: |
           ls -al
-          VERSION=$(cat ./version.txt)
+          VERSION=$(cat version.txt)
           VERSION="${VERSION:1}"
           VERSION=edge
           MAJOR="$(echo "${VERSION}" | cut -d. -f1)"
