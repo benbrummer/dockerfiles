@@ -38,9 +38,9 @@ jobs:
         name: Build and push
         uses: docker/bake-action@v6
         env:
-          VERSION=${{ steps.prep.outputs.version }}
-          MAJOR=${{ steps.prep.outputs.major }}
-          MAJOR_MINOR=${{ steps.prep.outputs.major_minor}}
+          VERSION: ${{ steps.prep.outputs.version }}
+          MAJOR: ${{ steps.prep.outputs.major }}
+          MAJOR_MINOR: ${{ steps.prep.outputs.major_minor}}
         with:
           files: docker-bake.hcl
           # push: true
