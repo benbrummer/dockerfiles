@@ -41,7 +41,8 @@ jobs:
           VERSION=${{ steps.prep.outputs.version }}
           MAJOR=${{ steps.prep.outputs.major }}
           MAJOR_MINOR=${{ steps.prep.outputs.major_minor}}
-        # with:
+        with:
+          files: docker-bake.hcl
           # push: true
           # set: |
           #   *.tags=user/app:latest
