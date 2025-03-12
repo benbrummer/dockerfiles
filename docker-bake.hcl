@@ -1,5 +1,5 @@
 variable "BASE" {
-    default="invoiceninja/invoiceninja-octane"
+    default="benbrummer/invoiceninja-octane"
 }
 variable "VERSION" {
     default="latest"
@@ -9,7 +9,7 @@ variable "MAJOR" {
     default="latest"
 }
 
-variable "MAJOR_MINOR" {
+variable "MINOR" {
     default="latest"
 }
 
@@ -33,7 +33,7 @@ target "app" {
         "${BASE}:latest",
         "${BASE}:${VERSION}",
         "${BASE}:${MAJOR}",
-        "${BASE}:${MAJOR_MINOR}"]
+        "${BASE}:${MINOR}"]
     target = "app"
 }
 
@@ -43,7 +43,7 @@ target "scheduler" {
         "${BASE}-scheduler:latest",
         "${BASE}-scheduler:${VERSION}",
         "${BASE}-scheduler:${MAJOR}",
-        "${BASE}-scheduler:${MAJOR_MINOR}"]
+        "${BASE}-scheduler:${MINOR}"]
     target = "scheduler"
 }
 
@@ -53,7 +53,7 @@ target "worker" {
         "${BASE}-worker:latest",
         "${BASE}-worker:${VERSION}",
         "${BASE}-worker:${MAJOR}",
-        "${BASE}-worker:${MAJOR_MINOR}"
+        "${BASE}-worker:${MINOR}"
         ]
     target = "worker"
 }
