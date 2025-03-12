@@ -30,4 +30,4 @@ jobs:
         uses: docker/bake-action@v6
         with:
           files: docker-bake.hcl
-          push: ${{ github.ref == 'refs/heads/main' }}
+          push: ${{ github.ref == 'refs/heads/octane-action' }}
