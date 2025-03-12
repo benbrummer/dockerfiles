@@ -30,4 +30,4 @@ jobs:
         uses: docker/bake-action@v6
         with:
           files: docker-bake.hcl
-          push: true
+          push: ${{ github.ref == 'refs/heads/main' }}
