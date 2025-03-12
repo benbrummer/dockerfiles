@@ -22,6 +22,9 @@ group "default" {
 }
 
 target _common {
+    args = {
+        INVOICENINJA_VERSION = "${VERSION}"
+    }
     platforms = ["linux/amd64", "linux/arm64"]
     pull = true
 }

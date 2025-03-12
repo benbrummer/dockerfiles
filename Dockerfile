@@ -4,10 +4,14 @@ ARG DEBIAN_VERSION=bookworm
 
 FROM dunglas/frankenphp:${FRANKENPHP_VERSION}-php${PHP_VERSION}-${DEBIAN_VERSION} AS prepare-app
 
-RUN curl -s "https://api.github.com/repos/invoiceninja/invoiceninja/releases/latest" | \
-    grep -o '"browser_download_url": "[^"]*invoiceninja.tar"' | \
-    cut -d '"' -f 4 | \
-    xargs curl -sL | \
+ARG INVOICENINJA_VERSION=latest
+
+RUN if [ "${INVOICENINJA_VERSION}" = "latest" ]; then \
+        url="https://github.com/invoiceninja/invoiceninja/releases/latest/download/invoiceninja.tar"; \
+    else \
+        url="https://github.com/invoiceninja/invoiceninja/releases/download/v${INVOICENINJA_VERSION}/invoiceninja.tar"; \
+    fi \
+    && curl -sL "${url}" | \
     tar -xz \
     && ln -s ./resources/views/react/index.blade.php ./public/index.html \
     # Symlink
