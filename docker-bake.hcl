@@ -1,5 +1,5 @@
 variable "BASE" {
-    default="benbrummer/invoiceninja-octane"
+    default="benbrummer/invoiceninja"
 }
 variable "VERSION" {
     default="latest"
@@ -33,27 +33,30 @@ target "app" {
     description = "Invoiceninja Application Image"
     inherits = ["_common"]
     tags = [
-        "${BASE}:${VERSION}",
-        "${BASE}:${MAJOR}",
-        "${BASE}:${MINOR}"]
+        "${BASE}:latest-octane",
+        "${BASE}:${VERSION}-octane",
+        "${BASE}:${MAJOR}-octane",
+        "${BASE}:${MINOR}-octane"]
     target = "app"
 }
 
 target "scheduler" {
     description = "Laravel Scheduler for Invoiceninja Application Image"
     tags = [
-        "${BASE}-scheduler:${VERSION}",
-        "${BASE}-scheduler:${MAJOR}",
-        "${BASE}-scheduler:${MINOR}"]
+        "${BASE}:latest-octane-scheduler",
+        "${BASE}:${VERSION}-octane-scheduler",
+        "${BASE}:${MAJOR}-octane-scheduler",
+        "${BASE}:${MINOR}-octane-scheduler"]
     target = "scheduler"
 }
 
 target "worker" {
     description = "Laravel Worker for Invoiceninja Application Image"
     tags = [
-        "${BASE}-worker:${VERSION}",
-        "${BASE}-worker:${MAJOR}",
-        "${BASE}-worker:${MINOR}"
+        "${BASE}:latest-octane-worker",
+        "${BASE}:${VERSION}-octane-worker",
+        "${BASE}:${MAJOR}-octane-worker",
+        "${BASE}:${MINOR}-octane-worker"
         ]
     target = "worker"
 }
