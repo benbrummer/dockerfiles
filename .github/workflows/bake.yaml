@@ -1,10 +1,10 @@
 name: ci
 
-on:
-  workflow_dispatch:
+on:  
   push:
     paths:
       - 'version.txt'
+  workflow_dispatch:
 
 jobs:
   bake:
