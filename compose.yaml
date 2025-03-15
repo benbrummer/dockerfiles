@@ -15,7 +15,7 @@ x-app-volumes: &volumes
 
 services:
   app:
-    image: invoiceninja/invoiceninja:5-octane
+    image: benbrummer/invoiceninja:5-octane
     restart: unless-stopped
     command: --port=80 --workers=2 --log-level=info
     # command: --host=example.com --port=443 --workers=2 --https --http-redirect --log-level=info
@@ -37,7 +37,7 @@ services:
     # tty: true
 
   scheduler:
-    image: invoiceninja/invoiceninja:5-octane-scheduler
+    image: benbrummer/invoiceninja:5-octane-scheduler
     restart: unless-stopped
     command: --verbose
     env_file:
@@ -49,7 +49,7 @@ services:
     logging: *default-logging
 
   worker:
-    image: invoiceninja/invoiceninja:5-octane-worker
+    image: benbrummer/invoiceninja:5-octane-worker
     restart: unless-stopped
     command: --verbose --sleep=3 --tries=3 --max-time=3600
     deploy:
