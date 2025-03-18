@@ -1,4 +1,4 @@
-name: ci
+name: bake
 
 on:  
   push:
