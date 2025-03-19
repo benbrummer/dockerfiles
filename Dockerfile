@@ -7,9 +7,9 @@ FROM dunglas/frankenphp:${FRANKENPHP_VERSION}-php${PHP_VERSION}-${DEBIAN_VERSION
 ARG INVOICENINJA_VERSION=latest
 
 RUN if [ "${INVOICENINJA_VERSION}" = "latest" ]; then \
-        url="https://github.com/invoiceninja/invoiceninja/releases/latest/download/invoiceninja.tar"; \
+        url="https://github.com/invoiceninja/invoiceninja/releases/latest/download/invoiceninja.tar.gz"; \
     else \
-        url="https://github.com/invoiceninja/invoiceninja/releases/download/v${INVOICENINJA_VERSION}/invoiceninja.tar"; \
+        url="https://github.com/invoiceninja/invoiceninja/releases/download/v${INVOICENINJA_VERSION}/invoiceninja.tar.gz"; \
     fi \
     && curl -sL "${url}" | \
     tar -xz \
