@@ -82,6 +82,7 @@ COPY --chmod=0755 scripts/init.sh /usr/local/bin/init.sh
 
 USER ${user}
 
+ENV FILESYSTEM_DISK=debian_docker
 ENV IS_DOCKER=true
 ENV SNAPPDF_CHROMIUM_PATH=/usr/bin/chromium
 
