@@ -14,6 +14,9 @@ jobs:
         run: |
           curl -sL https://api.github.com/repos/invoiceninja/invoiceninja/releases/latest | \
           jq -r ".tag_name" > version.txt
+          if [ "$(cat version.txt)" = "null" ]; then
+            git restore version.txt
+          fi
       - name: Check for modified files
         id: git-check
         run: echo "modified=$([ -z "`git status --porcelain`" ] && echo "false" || echo "true")" >> $GITHUB_OUTPUT
