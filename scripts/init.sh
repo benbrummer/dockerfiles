@@ -1,23 +1,22 @@
 #!/bin/sh -eu
 
-
 if [ "--help" = "$1" ]; then
     echo [FLAGS]
     echo The CMD defined can be extended with flags for artisan commands
     echo
     echo Available flags can be displaced:
-    echo docker run --rm invoiceninja/invoiceninja-debian frankenphp php-cli artisan help octane:frankenphp
-    echo docker run --rm invoiceninja/invoiceninja-debian frankenphp php-cli artisan help queue:work
-    echo docker run --rm invoiceninja/invoiceninja-debian frankenphp php-cli artisan help schedule:work
+    echo docker run --rm benbrummer/invoiceninja:5-octane frankenphp php-cli artisan help octane:frankenphp
+    echo docker run --rm benbrummer/invoiceninja:5-octane-worker frankenphp php-cli artisan help queue:work
+    echo docker run --rm benbrummer/invoiceninja:5-octane-scheduler frankenphp php-cli artisan help schedule:work
     echo
     echo Example:
-    echo docker run -e LARAVEL_ROLE=worker invoiceninja/invoiceninja-debian --verbose --sleep=3 --tries=3 --max-time=3600
+    echo docker run benbrummer/invoiceninja:5-octane-worker --verbose --sleep=3 --tries=3 --max-time=3600
     echo
     echo [Deployment]
     echo Docker compose is recommended
     echo
     echo Example:
-    echo https://github.com/invoiceninja/dockerfiles/blob/octane/debian/docker-compose.yml
+    echo https://github.com/benbrummer/dockerfiles/blob/octane-action/sample.compose.yaml
     echo
     exit 0
 fi
@@ -35,7 +34,7 @@ if [ "${LARAVEL_ROLE}" = "app" ] && { [ "$*" = 'frankenphp php-cli artisan octan
         frankenphp php-cli artisan migrate --force
 
         # If first IN run, it needs to be initialized
-        if [ "$(php -d opcache.preload='' artisan tinker --execute='echo Schema::hasTable("accounts") && !App\Models\Account::all()->first();')" = "1" ]; then
+        if [ "$(frankenphp php-cli artisan tinker --execute='echo Schema::hasTable("accounts") && !App\Models\Account::all()->first();')" = "1" ]; then
             echo "Running initialization..."
 
             frankenphp php-cli artisan db:seed --force
