@@ -92,7 +92,7 @@ Support for Invoice Ninja itself can be requested trough the official ressources
 x-app-volumes: &volumes
   volumes:
       # Modified php.ini overwrites the invoiceninja.ini baked into the image
-      - php/php.ini /usr/local/etc/php/conf.d/invoiceninja.ini
+      - ./php/php.ini:/usr/local/etc/php/conf.d/invoiceninja.ini
 ```
 
 ## Building the Image
