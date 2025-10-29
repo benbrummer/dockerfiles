@@ -1,0 +1,29 @@
+name: Get latest release version
+on:
+  schedule:
+    - cron:  '55 11 * * *'
+  workflow_dispatch:
+jobs:
+  get-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.REPO_SCOPED_TOKEN }}
+      - name: Fetch release version
+        run: |
+          curl -sL https://api.github.com/repos/invoiceninja/invoiceninja/releases/latest | \
+          jq -r ".tag_name" > version.txt
+          if [ "$(cat version.txt)" = "null" ]; then
+            git restore version.txt
+          fi
+      - name: Check for modified files
+        id: git-check
+        run: echo "modified=$([ -z "`git status --porcelain`" ] && echo "false" || echo "true")" >> $GITHUB_OUTPUT
+      - name: Commit latest release version
+        if: steps.git-check.outputs.modified == 'true'
+        run: |
+          git config --global user.name 'Benjamin Brummer'
+          git config --global user.email 'info@benjamin-brummer.de'
+          git commit -am "$(cat version.txt)"
+          git push

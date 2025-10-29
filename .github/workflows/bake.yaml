@@ -1,0 +1,199 @@
+name: Docker Build
+
+on:
+  push:
+
+env:
+  REGISTRY_IMAGE: benbrummer/invoiceninja
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.generate.outputs.matrix }}
+      version: ${{ steps.version.outputs.VERSION }}
+      major: ${{ steps.version.outputs.MAJOR }}
+      minor: ${{ steps.version.outputs.MINOR }}
+      url: ${{ steps.version.outputs.URL }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            docker-bake.hcl
+            version.sh
+            version.txt
+          sparse-checkout-cone-mode: false
+
+      - name: Generate matrix
+        id: generate
+        uses: docker/bake-action/subaction/matrix@v6
+        with:
+          target: default
+          fields: platforms
+      
+      - name: Get version
+        id: version
+        run: |
+          if [ ! -f ./version.sh ]; then
+            echo "version.sh not found"
+            exit 1
+          fi
+          source ./version.sh
+
+  meta:
+    runs-on: ubuntu-latest
+    needs:
+      prepare
+    strategy:
+      matrix:
+        target: [app, scheduler, worker]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4      
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          bake-target: ${{ matrix.target }}
+          images: ${{ env.REGISTRY_IMAGE }}
+          tags: |
+            ${{ needs.prepare.outputs.version }}-octane
+            ${{ needs.prepare.outputs.major }}-octane
+            ${{ needs.prepare.outputs.minor }}-octane
+            latest-octane
+          flavor: suffix=-${{ matrix.target }}
+
+      - name: Rename meta bake definition file
+        run: |
+          mv "${{ steps.meta.outputs.bake-file }}" "${{ runner.temp }}/bake-meta-${{ matrix.target }}.json"
+
+      - name: Upload meta bake definition
+        uses: actions/upload-artifact@v4
+        with:
+          name: bake-meta-${{ matrix.target }}
+          path: ${{ runner.temp }}/bake-meta-${{ matrix.target }}.json
+          if-no-files-found: error
+          retention-days: 1
+
+  build:
+    runs-on: ${{ startsWith(matrix.platforms, 'linux/arm') && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    needs:
+      - prepare
+      - meta
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.prepare.outputs.matrix) }}
+
+    steps:
+      - name: Prepare
+        run: |
+          platform=${{ matrix.platforms }}
+          echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
+
+      - name: Download meta bake definition
+        uses: actions/download-artifact@v4
+        with:
+          name: bake-meta-${{ matrix.target }}
+          path: ${{ runner.temp }}
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build
+        id: bake
+        uses: docker/bake-action@v6
+        with:
+          files: |
+            ./docker-bake.hcl
+            cwd://${{ runner.temp }}/bake-meta-${{ matrix.target }}.json
+
+          set: |
+            *.args.URL=${{ needs.prepare.outputs.url }}
+            *.tags=${{ env.REGISTRY_IMAGE }}
+            *.platform=${{ matrix.platforms }}
+            *.output=type=image,push-by-digest=true,name-canonical=true,push=${{ github.ref == 'refs/heads/main' }}
+            *.cache-from=type=gha,scope=${{ matrix.target }}
+            *.cache-to=type=gha,mode=max,scope=${{ matrix.target }}
+
+      - name: Export digest
+        run: |
+          mkdir -p ${{ runner.temp }}/digests/${{ matrix.target }}
+          digest="${{ fromJSON(steps.bake.outputs.metadata)[matrix.target]['containerimage.digest'] }}"
+          touch "${{ runner.temp }}/digests/${{ matrix.target }}/${digest#sha256:}"
+
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-${{ matrix.target }}-${{ env.PLATFORM_PAIR }}
+          path: ${{ runner.temp }}/digests/${{ matrix.target }}
+          if-no-files-found: error
+          retention-days: 1
+
+  merge:
+    runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/main' }}
+    needs:
+      - build
+    strategy:
+      matrix:
+        target: [app, scheduler, worker]
+
+    steps:
+      - name: Download meta bake definition
+        uses: actions/download-artifact@v4
+        with:
+          name: bake-meta-${{ matrix.target }}
+          path: ${{ runner.temp }}
+
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ runner.temp }}/digests/${{ matrix.target }}
+          pattern: digests-${{ matrix.target }}-*
+          merge-multiple: true
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Create manifest list and push
+        working-directory: ${{ runner.temp }}/digests/${{ matrix.target }}
+        run: |
+          docker buildx imagetools create $(jq -cr '.target."${{ matrix.target }}".tags | map(select(startswith("${{ env.REGISTRY_IMAGE }}")) | "-t " + .) | join(" ")' ${{ runner.temp }}/bake-meta-${{ matrix.target }}.json) \
+            $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:$(jq -r '.target."${{ matrix.target }}".args.DOCKER_META_VERSION' ${{ runner.temp }}/bake-meta-${{ matrix.target }}.json)
+
+  Description:
+    runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/main' }}
+    needs:
+      - merge
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          sparse-checkout: "README.md"
+          sparse-checkout-cone-mode: false
+      - name: Docker Hub Description
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: benbrummer/invoiceninja

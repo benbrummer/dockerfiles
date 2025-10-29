@@ -1,0 +1,79 @@
+name: invoiceninja
+
+x-app-volumes: &volumes
+  volumes:
+    - app_storage:/app/storage
+    - caddy_data:/data
+    # - ./php/php.ini:/usr/local/etc/php/conf.d/invoiceninja.ini
+
+services:
+  app:
+    image: benbrummer/invoiceninja:5-octane-app
+    restart: unless-stopped
+    command: --port=80 --workers=2
+    # command: --host=example.com --port=443 --workers=2 --https --http-redirect --log-level=info
+    ports:
+      - "80:80" # HTTP
+      # - "443:443" # HTTPS
+      # - "443:443/udp" # HTTP/3, Works for chromium based browser, but causes H3_GENERAL_PROTOCOL_ERROR for pdf previews in Firefox
+    env_file:
+      - ./.env
+    <<: *volumes
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+    # tty: true
+
+  scheduler:
+    image: benbrummer/invoiceninja:5-octane-scheduler
+    restart: unless-stopped
+    command: --verbose
+    env_file:
+      - ./.env
+    <<: *volumes
+    depends_on:
+      app:
+        condition: service_healthy
+
+  worker:
+    image: benbrummer/invoiceninja:5-octane-worker
+    restart: unless-stopped
+    command: --verbose --sleep=3 --tries=3 --max-time=3600
+    deploy:
+      mode: replicated
+      replicas: 2
+    env_file:
+      - ./.env
+    <<: *volumes
+    depends_on:
+      app:
+        condition: service_healthy
+
+  mariadb:
+    image: mariadb:11.8
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${DB_DATABASE}
+      MARIADB_USER: ${DB_USERNAME}
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - mariadb:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
+
+  valkey:
+    image: valkey/valkey:8
+    restart: unless-stopped
+    volumes:
+      - valkey:/data
+    healthcheck:
+      test: [ "CMD", "valkey-cli", "ping" ]
+
+volumes:
+  app_storage:
+  caddy_data:
+  mariadb:
+  valkey:
