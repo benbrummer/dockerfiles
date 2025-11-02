@@ -42,6 +42,7 @@ target "app" {
     description = "Invoiceninja Application Image"
     inherits = ["_common"]
     tags = [for tag in target._common.tags : replace(tag, "octane", "octane-app")]
+    target = "app"
 }
 
 target "scheduler" {
