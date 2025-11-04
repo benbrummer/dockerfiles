@@ -4,10 +4,10 @@
 
 # FrankenPHP based Image for [Invoice Ninja](https://www.invoiceninja.com/)
 
-> :information_source: Image will be deployed with each release of [Invoice Ninja](https://github.com/invoiceninja/invoiceninja/releases) to https://hub.docker.com/r/benbrummer/invoiceninja for `arm64` and `amd64`
+> ℹ️ Image will be deployed once a day for the latest release of [Invoice Ninja](https://github.com/invoiceninja/invoiceninja/releases) to https://hub.docker.com/r/benbrummer/invoiceninja for `arm64` and `amd64`
 
 
-:crown: **Features**
+👑 **Features**
 
 aligned with [invoiceninja-debian](https://github.com/invoiceninja/dockerfiles/tree/debian)
 
@@ -26,7 +26,7 @@ git clone https://github.com/benbrummer/dockerfiles.git
 cd dockerfiles
 ```
 
-1. Make a copy of `sample.compose.yaml` named `compose.yaml` and adapt it to your needs. A simple help menu for the image(s) can be displayed by running `docker run --rm benbrummer/invoiceninja:5-octane --help`
+1. Make a copy of `sample.compose.yaml` named `compose.yaml` and adapt it to your needs. A simple help menu for the image(s) can be displayed by running `docker run --rm benbrummer/invoiceninja:5-octane-app --help`
 1. Instead of defining environment variables inside the compose.yaml file, these need to be set in a `.env` file. Create a copy of `sample.env` file named `.env`.
 1. Open this file and insert your `APP_URL`, `APP_KEY` and update the rest of the variables as required.
 
@@ -50,7 +50,7 @@ Prior to starting the container for the first time, open the .env file and updat
 
 This will take care of the initial account setup. You can later remove these .env variables.
 
-> :warning: **Warning**  
+> ⚠️ **Warning**  
 > If `IN_USER_EMAIL` and `IN_PASSWORD` are not set the default user email and password is "admin@example.com" and "changeme!" respectively. 
 
 After the container has completed the first startup, you can delete these two environment variables.
@@ -97,7 +97,7 @@ x-app-volumes: &volumes
 
 ## Building the Image
 
-> :information_source: To build just for a specific platform use `--set *.platform=linux/amd64` with the `bake` command
+> ℹ️ To build just for a specific platform use `--set *.platform=linux/amd64` with the `bake` command
 
 ### Latest
 
