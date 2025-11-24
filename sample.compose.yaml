@@ -65,7 +65,7 @@ services:
       test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
 
   valkey:
-    image: valkey/valkey:8
+    image: valkey/valkey:9
     restart: unless-stopped
     volumes:
       - valkey:/data
