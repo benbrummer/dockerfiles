@@ -1,6 +1,11 @@
 variable "REGISTRY_IMAGE" {
     default="benbrummer/invoiceninja"
 }
+
+variable "URL" {
+    default = "https://github.com/invoiceninja/invoiceninja/releases/latest/download/invoiceninja.tar.gz"
+}
+
 variable "VERSION" {
     default="latest"
 }
@@ -23,17 +28,17 @@ group "default" {
 
 target _common {
     args = {
-        URL = "https://github.com/invoiceninja/invoiceninja/releases/latest/download/invoiceninja.tar.gz"
+        URL = "${URL}"
     }
     platforms = [
         "linux/amd64",
         "linux/arm64"
     ]
     tags = [        
-        "${REGISTRY_IMAGE}:${VERSION}-octane",
-        "${REGISTRY_IMAGE}:${MAJOR}-octane",
-        "${REGISTRY_IMAGE}:${MINOR}-octane",
-        "${REGISTRY_IMAGE}:latest-octane"
+        "${REGISTRY_IMAGE}:${VERSION}-",
+        "${REGISTRY_IMAGE}:${MAJOR}-",
+        "${REGISTRY_IMAGE}:${MINOR}-",
+        "${REGISTRY_IMAGE}:latest-"
     ]
     pull = true
 }
@@ -41,20 +46,20 @@ target _common {
 target "app" {
     description = "Invoiceninja Application Image"
     inherits = ["_common"]
-    tags = [for tag in target._common.tags : replace(tag, "octane", "octane-app")]
+    tags = [for tag in target._common.tags : replace(tag, "-", "-app")]
     target = "app"
 }
 
 target "scheduler" {
     description = "Laravel Scheduler for Invoiceninja Application Image"
     inherits = ["_common"]
-    tags = [for tag in target._common.tags : replace(tag, "octane", "octane-scheduler")]
+    tags = [for tag in target._common.tags : replace(tag, "-", "-scheduler")]
     target = "scheduler"
 }
 
 target "worker" {
     description = "Laravel Worker for Invoiceninja Application Image"
     inherits = ["_common"]
-    tags = [for tag in target._common.tags : replace(tag, "octane", "octane-worker")]
+    tags = [for tag in target._common.tags : replace(tag, "-", "-worker")]
     target = "worker"
 }

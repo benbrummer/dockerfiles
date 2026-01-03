@@ -60,7 +60,7 @@ RUN ( curl -sSLf https://github.com/mlocati/docker-php-extension-installer/relea
 # Configure PHP
 RUN ln -s "${PHP_INI_DIR}/php.ini-production" "${PHP_INI_DIR}/php.ini"
 
-COPY php/php.ini /usr/local/etc/php/conf.d/invoiceninja.ini
+COPY ./php.ini /usr/local/etc/php/conf.d/invoiceninja.ini
 
 # Create directory for artisan tinker (init.sh)
 RUN mkdir /config/psysh \
@@ -75,7 +75,7 @@ RUN chown -R ${user}: \
 COPY --from=prepare-app --chown=${user}:${user} /app /app
 
 # Add initialization script
-COPY --chmod=0755 scripts/init.sh /usr/local/bin/init.sh
+COPY --chmod=0755 ./entrypoint.sh /usr/local/bin/entrypoint.sh
 
 USER ${user}
 
@@ -83,7 +83,7 @@ ENV FILESYSTEM_DISK=debian_docker
 ENV IS_DOCKER=true
 ENV SNAPPDF_CHROMIUM_PATH=/usr/bin/chromium
 
-ENTRYPOINT ["/usr/local/bin/init.sh"]
+ENTRYPOINT ["entrypoint.sh"]
 
 FROM base AS app
 ENV LARAVEL_ROLE=app
