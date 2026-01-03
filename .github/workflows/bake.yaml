@@ -59,10 +59,10 @@ jobs:
           bake-target: ${{ matrix.target }}
           images: ${{ env.REGISTRY_IMAGE }}
           tags: |
-            ${{ needs.prepare.outputs.version }}-
-            ${{ needs.prepare.outputs.major }}-
-            ${{ needs.prepare.outputs.minor }}-
-            latest-
+            ${{ needs.prepare.outputs.version }}
+            ${{ needs.prepare.outputs.major }}
+            ${{ needs.prepare.outputs.minor }}
+            latest
           flavor: suffix=-${{ matrix.target }}
 
       - name: Rename meta bake definition file
