@@ -101,9 +101,8 @@ CMD ["php", "artisan", "octane:frankenphp"]
 FROM base AS scheduler
 ENV LARAVEL_ROLE=scheduler
 USER ${user}
-HEALTHCHECK --interval=60s \
-    CMD find /tmp/scheduler_heartbeat -mmin -2 | grep . || exit 1
-CMD []
+HEALTHCHECK --start-period=10s CMD pgrep -f schedule:work || exit 1
+CMD ["php", "artisan", "schedule:work", "--no-interaction"]
 
 FROM base AS worker
 ENV LARAVEL_ROLE=worker

@@ -79,26 +79,16 @@ else
 
     scheduler)
         [ "$APP_ENV" = "production" ] && php artisan optimize
-        echo "Starting Scheduler loop..."
+        echo "Starting scheduler ..."
 
-        # Catch signals to exit the loop immediately
-        trap "echo 'Stopping scheduler...'; exit 0" SIGTERM SIGINT
-
-        while true; do
-            touch /tmp/scheduler_heartbeat
-            # Run scheduler in background, output still goes to stdout
-            php artisan schedule:run --no-interaction "$@" &
-            wait $! # Wait for the command to finish
-
-            # Sleep in background so the 'trap' can interrupt it
-            sleep 60 &
-            wait $!
-        done
+        if [ $# -eq 0 ] || [[ "$1" == -* ]]; then
+            set -- php artisan queue:work --no-interaction "$@"
+        fi
         ;;
 
     worker)
         [ "$APP_ENV" = "production" ] && php artisan optimize
-        echo "Starting Worker..."
+        echo "Starting worker..."
         if [ $# -eq 0 ] || [[ "$1" == -* ]]; then
             set -- php artisan queue:work --no-interaction "$@"
         fi

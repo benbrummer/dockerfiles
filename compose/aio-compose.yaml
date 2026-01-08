@@ -1,4 +1,4 @@
-name: invoiceninja-aio
+name: invoiceninja
 
 services:
   aio:

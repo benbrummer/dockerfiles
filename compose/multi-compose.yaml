@@ -10,6 +10,7 @@ services:
   app:
     image: benbrummer/invoiceninja:5-app
     restart: unless-stopped
+    stop_grace_period: 30s
     command: --port=80 --workers=2
     # command: --host=example.com --port=443 --workers=2 --https --http-redirect --log-level=info
     ports:
