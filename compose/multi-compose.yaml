@@ -13,7 +13,7 @@ services:
     command: --port=80 --workers=2
     # command: --host=example.com --port=443 --workers=2 --https --http-redirect --log-level=info
     ports:
-      - "80:80" # HTTP
+      - "8012:80" # HTTP
       # - "443:443" # HTTPS
       # - "443:443/udp" # HTTP/3, Works for chromium based browser, but causes H3_GENERAL_PROTOCOL_ERROR for pdf previews in Firefox
     env_file:

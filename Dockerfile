@@ -29,7 +29,8 @@ ARG php_extra="opcache"
 ARG saxon_edition="HE"
 
 # Create a system user UID/GID=999
-RUN	useradd -r ${user}
+RUN groupadd -g 999 ${user} && \
+    useradd -u 999 -g ${user} -r ${user}
 
 # Allow to bind to privileged ports
 RUN setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/frankenphp
@@ -77,25 +78,35 @@ COPY --from=prepare-app --chown=${user}:${user} /app /app
 # Add initialization script
 COPY --chmod=0755 ./entrypoint.sh /usr/local/bin/entrypoint.sh
 
-USER ${user}
-
 ENV FILESYSTEM_DISK=debian_docker
 ENV IS_DOCKER=true
 ENV SNAPPDF_CHROMIUM_PATH=/usr/bin/chromium
 
 ENTRYPOINT ["entrypoint.sh"]
 
+FROM base AS aio
+ENV LARAVEL_ROLE=aio
+HEALTHCHECK --start-period=100s CMD curl -f http://localhost/health || exit 1
+RUN apt-get update && apt-get install -y --no-install-recommends supervisor && rm -rf /var/lib/apt/lists/*
+COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+CMD ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]
+
 FROM base AS app
+# STOPSIGNAL SIGQUIT
 ENV LARAVEL_ROLE=app
-HEALTHCHECK --start-period=100s CMD curl -f http://localhost/health
+USER ${user}
+HEALTHCHECK --start-period=100s CMD curl -f http://localhost/health || exit 1
 CMD ["frankenphp", "php-cli", "artisan", "octane:frankenphp"]
 
 FROM base AS scheduler
 ENV LARAVEL_ROLE=scheduler
-HEALTHCHECK --start-period=10s CMD pgrep -f schedule:work
-CMD ["frankenphp", "php-cli", "artisan", "schedule:work"]
+USER ${user}
+HEALTHCHECK --interval=60s \
+    CMD find /tmp/scheduler_heartbeat -mmin -2 | grep . || exit 1
+CMD []
 
 FROM base AS worker
 ENV LARAVEL_ROLE=worker
-HEALTHCHECK --start-period=10s CMD pgrep -f queue:work
-CMD ["frankenphp", "php-cli", "artisan", "queue:work"]
+USER ${user}
+HEALTHCHECK --start-period=10s CMD pgrep -f queue:work || exit 1
+CMD ["php", "artisan", "queue:work", "--no-interaction"]

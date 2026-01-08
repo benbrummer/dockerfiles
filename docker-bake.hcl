@@ -20,6 +20,7 @@ variable "MINOR" {
 
 group "default" {
     targets = [
+      "aio",
       "app",
       "scheduler",
       "worker"
@@ -41,6 +42,13 @@ target _common {
         "${REGISTRY_IMAGE}:latest-"
     ]
     pull = true
+}
+
+target "aio" {
+    description = "AIO for Invoiceninja Application Image"
+    inherits = ["_common"]
+    tags = [for tag in target._common.tags : replace(tag, "-", "-aio")]
+    target = "aio"
 }
 
 target "app" {

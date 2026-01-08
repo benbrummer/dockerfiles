@@ -1,0 +1,47 @@
+name: invoiceninja-aio
+
+services:
+  aio:
+    image: benbrummer/invoiceninja:latest-aio
+    restart: unless-stopped
+    ports:
+      - "8012:80" # HTTP
+    env_file:
+      - ./.env
+    volumes:
+      - app_storage:/app/storage
+      - caddy_data:/data
+      # - ./php/php.ini:/usr/local/etc/php/conf.d/invoiceninja.ini
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+    # tty: true
+
+  mariadb:
+    image: mariadb:11.8
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${DB_DATABASE}
+      MARIADB_USER: ${DB_USERNAME}
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - mariadb:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
+
+  valkey:
+    image: valkey/valkey:9
+    restart: unless-stopped
+    volumes:
+      - valkey:/data
+    healthcheck:
+      test: [ "CMD", "valkey-cli", "ping" ]
+
+volumes:
+  app_storage:
+  caddy_data:
+  mariadb:
+  valkey:
