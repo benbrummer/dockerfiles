@@ -47,7 +47,7 @@ jobs:
       prepare
     strategy:
       matrix:
-        target: [app, scheduler, worker]
+        target: [aio, app, scheduler, worker]
     steps:
       - name: Checkout
         uses: actions/checkout@v4      
@@ -145,7 +145,7 @@ jobs:
       - build
     strategy:
       matrix:
-        target: [app, scheduler, worker]
+        target: [aio, app, scheduler, worker]
 
     steps:
       - name: Download meta bake definition
