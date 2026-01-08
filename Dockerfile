@@ -96,7 +96,7 @@ FROM base AS app
 ENV LARAVEL_ROLE=app
 USER ${user}
 HEALTHCHECK --start-period=100s CMD curl -f http://localhost/health || exit 1
-CMD ["frankenphp", "php-cli", "artisan", "octane:frankenphp"]
+CMD ["php", "artisan", "octane:frankenphp"]
 
 FROM base AS scheduler
 ENV LARAVEL_ROLE=scheduler

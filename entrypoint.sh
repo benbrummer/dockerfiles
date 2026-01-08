@@ -34,7 +34,7 @@ else
         echo The CMD defined can be extended with flags for artisan commands
         echo
         echo Available flags can be displaced:
-        echo docker run --rm benbrummer/invoiceninja:5-app frankenphp php-cli artisan help octane:frankenphp
+        echo docker run --rm benbrummer/invoiceninja:5-app php artisan help octane:frankenphp
         echo docker run --rm benbrummer/invoiceninja:5-worker php artisan help queue:work
         echo docker run --rm benbrummer/invoiceninja:5-scheduler php artisan help schedule:work
         echo
@@ -53,7 +53,7 @@ else
     case "${LARAVEL_ROLE}" in
     app)
         # Check if we should prepend the octane command
-        if [ $# -eq 0 ] || [[ "$1" == -* ]] || [ "$*" = "frankenphp php-cli artisan octane:frankenphp" ]; then
+        if [ $# -eq 0 ] || [[ "$1" == -* ]] || [ "$*" = "php artisan octane:frankenphp" ]; then
             if [ "$APP_ENV" = "production" ]; then
                 echo "Running production setup..."
                 php artisan migrate --force
@@ -72,7 +72,7 @@ else
 
             # CRITICAL FIX: Prepend the base command if only flags were passed
             if [ $# -eq 0 ] || [[ "$1" == -* ]]; then
-                set -- frankenphp php-cli artisan octane:frankenphp "$@"
+                set -- php artisan octane:frankenphp "$@"
             fi
         fi
         ;;
