@@ -64,8 +64,7 @@ Start the container with:
 ```bash
 docker compose up -d
 ```
-
-**Note: When performing the setup, the Database host is `mariadb`
+Afterwards you can open your browser http://localhost:8012/
 
 ## Updating the Image
 
@@ -90,10 +89,9 @@ Support for Invoice Ninja itself can be requested trough the official ressources
 
 ## Customizing PHP Settings
 
-`./php/php.ini` is baked into the image as `/usr/local/etc/php/conf.d/invoiceninja.ini`. Adapting php values to your needs is done by mounting additional `ini-files` into `/usr/local/etc/php/conf.d/`. The files are considered in alphabetical order. The last value will be taken.
+`./php.ini` is baked into the image as `/usr/local/etc/php/conf.d/invoiceninja.ini`. Adapting php values to your needs is done by mounting `ini-files` into `/usr/local/etc/php/conf.d/`. The files are considered in alphabetical order. The last value will be taken.
 
 ```yaml
-x-app-volumes: &volumes
   volumes:
       # Modified php.ini overwrites the invoiceninja.ini baked into the image
       - ./php/php.ini:/usr/local/etc/php/conf.d/invoiceninja.ini
