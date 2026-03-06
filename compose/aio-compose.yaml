@@ -11,7 +11,8 @@ services:
     volumes:
       - app_storage:/app/storage
       - caddy_data:/data
-      # - ./php/php.ini:/usr/local/etc/php/conf.d/invoiceninja.ini
+      # - ../php.ini:/usr/local/etc/php/conf.d/invoiceninja.ini
+      # - ../supervisord.conf:/etc/supervisor/conf.d/invoiceninja.conf
     depends_on:
       mariadb:
         condition: service_healthy

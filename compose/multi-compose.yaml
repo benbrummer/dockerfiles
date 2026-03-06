@@ -4,17 +4,15 @@ x-app-volumes: &volumes
   volumes:
     - app_storage:/app/storage
     - caddy_data:/data
-    # - ./php/php.ini:/usr/local/etc/php/conf.d/invoiceninja.ini
+    # - ../php.ini:/usr/local/etc/php/conf.d/invoiceninja.ini
 
 services:
   app:
     image: benbrummer/invoiceninja:5-app
     restart: unless-stopped
-    stop_grace_period: 30s
-    command: --port=80 --workers=2
-    # command: --host=example.com --port=443 --workers=2 --https --http-redirect --log-level=info
+    command: ${OCTANE_OPTS:---port=80}
     ports:
-      - "8012:80" # HTTP
+      - "80:80" # HTTP
       # - "443:443" # HTTPS
       # - "443:443/udp" # HTTP/3, Works for chromium based browser, but causes H3_GENERAL_PROTOCOL_ERROR for pdf previews in Firefox
     env_file:
