@@ -64,7 +64,7 @@ Start the container with:
 ```bash
 docker compose up -d
 ```
-Afterwards you can open your browser http://localhost:8012/
+Afterwards you can open your browser http://localhost/
 
 ## Updating the Image
 

@@ -92,7 +92,6 @@ COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 CMD ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]
 
 FROM base AS app
-# STOPSIGNAL SIGQUIT
 ENV LARAVEL_ROLE=app
 USER ${user}
 HEALTHCHECK --start-period=100s CMD curl -f http://localhost/health || exit 1
