@@ -33,7 +33,7 @@ else
         echo [FLAGS]
         echo The CMD defined can be extended with flags for artisan commands
         echo
-        echo Available flags can be displaced:
+        echo Available flags can be queried:
         echo docker run --rm benbrummer/invoiceninja:5-app php artisan help octane:frankenphp
         echo docker run --rm benbrummer/invoiceninja:5-worker php artisan help queue:work
         echo docker run --rm benbrummer/invoiceninja:5-scheduler php artisan help schedule:work
@@ -42,10 +42,10 @@ else
         echo docker run benbrummer/invoiceninja:5-worker --verbose --sleep=3 --tries=3 --max-time=3600
         echo
         echo [Deployment]
-        echo Docker compose is recommended
+        echo Compose is recommended
         echo
-        echo Example:
-        echo https://github.com/benbrummer/dockerfiles/blob/main/sample.compose.yaml
+        echo Example compose files:
+        echo https://github.com/benbrummer/dockerfiles/tree/main/compose
         echo
         exit 0
     fi

@@ -2,10 +2,10 @@ name: invoiceninja
 
 services:
   aio:
-    image: benbrummer/invoiceninja:latest-aio
+    image: benbrummer/invoiceninja:5-aio
     restart: unless-stopped
     ports:
-      - "8012:80" # HTTP
+      - "80:80" # HTTP
     env_file:
       - ./.env
     volumes:

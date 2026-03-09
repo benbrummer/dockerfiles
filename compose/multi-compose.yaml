@@ -12,9 +12,7 @@ services:
     restart: unless-stopped
     command: ${OCTANE_OPTS:---port=80}
     ports:
-      - "80:80" # HTTP
-      # - "443:443" # HTTPS
-      # - "443:443/udp" # HTTP/3, Works for chromium based browser, but causes H3_GENERAL_PROTOCOL_ERROR for pdf previews in Firefox
+      - "80:80"
     env_file:
       - ./.env
     <<: *volumes
