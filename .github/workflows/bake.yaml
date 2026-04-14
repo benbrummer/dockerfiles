@@ -27,7 +27,7 @@ jobs:
 
       - name: Generate matrix
         id: generate
-        uses: docker/bake-action/subaction/matrix@v7
+        uses: docker/bake-action/subaction/matrix@v8
         with:
           target: default
           fields: platforms
@@ -70,7 +70,7 @@ jobs:
           mv "${{ steps.meta.outputs.bake-file }}" "${{ runner.temp }}/bake-meta-${{ matrix.target }}.json"
 
       - name: Upload meta bake definition
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: bake-meta-${{ matrix.target }}
           path: ${{ runner.temp }}/bake-meta-${{ matrix.target }}.json
@@ -131,7 +131,7 @@ jobs:
           touch "${{ runner.temp }}/digests/${{ matrix.target }}/${digest#sha256:}"
 
       - name: Upload digest
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: digests-${{ matrix.target }}-${{ env.PLATFORM_PAIR }}
           path: ${{ runner.temp }}/digests/${{ matrix.target }}
