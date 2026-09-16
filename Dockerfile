@@ -32,6 +32,10 @@ ARG saxon_edition="HE"
 RUN groupadd -g 999 ${user} && \
     useradd -u 999 -g ${user} -r ${user}
 
+RUN chown -R ${user}: \
+    /data/caddy \
+    /config
+
 # Allow to bind to privileged ports
 RUN setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/frankenphp
 
@@ -44,9 +48,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     fonts-wqy-microhei \
     fonts-wqy-zenhei \
     xfonts-wqy \
-    # Create config directory for chromium
-    && mkdir /config/chromium \
-    && chown ${user}: /config/chromium \
     # Cleanup
     && apt-get autoremove -y \
     && apt-get clean \
@@ -62,15 +63,6 @@ RUN ( curl -sSLf https://github.com/mlocati/docker-php-extension-installer/relea
 RUN ln -s "${PHP_INI_DIR}/php.ini-production" "${PHP_INI_DIR}/php.ini"
 
 COPY ./php.ini /usr/local/etc/php/conf.d/invoiceninja.ini
-
-# Create directory for artisan tinker (init.sh)
-RUN mkdir /config/psysh \
-    && chown ${user}: /config/psysh
-
-# Change owner for caddy directories
-RUN chown -R ${user}: \
-    /data/caddy \
-    /config/caddy
 
 # InvoiceNinja
 COPY --from=prepare-app --chown=${user}:${user} /app /app
