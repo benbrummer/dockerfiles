@@ -80,7 +80,7 @@ FROM base AS aio
 ENV LARAVEL_ROLE=aio
 HEALTHCHECK --start-period=100s CMD curl -f http://localhost/health || exit 1
 RUN apt-get update && apt-get install -y --no-install-recommends supervisor && rm -rf /var/lib/apt/lists/*
-COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY ./supervisord.conf /etc/supervisor/supervisord.conf
 CMD ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]
 
 FROM base AS app
