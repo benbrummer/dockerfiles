@@ -54,10 +54,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
-RUN ( curl -sSLf https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions -o - || echo 'return 1' ) | IPE_SAXON_EDITION=${saxon_edition} sh -s \
+RUN curl -sSLf \
+    -o /usr/local/bin/install-php-extensions \
+    https://github.com/mlocati/install-php-extensions/releases/latest/download/install-php-extensions-gz \
+    && chmod +x /usr/local/bin/install-php-extensions \
+    && install-php-extensions \
+    --saxon:edition=${saxon_edition} \
     ${php_require} \
     ${php_suggest} \
-    ${php_extra}
+    ${php_extra} \
+    && rm /usr/local/bin/install-php-extensions
 
 # Configure PHP
 RUN ln -s "${PHP_INI_DIR}/php.ini-production" "${PHP_INI_DIR}/php.ini"
