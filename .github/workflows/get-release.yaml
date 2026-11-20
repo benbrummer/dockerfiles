@@ -1,18 +1,23 @@
 name: Get latest release version
+
 on:
   schedule:
-    - cron:  '55 11 * * *'
+    - cron: '55 11 * * *'
   workflow_dispatch:
+
 jobs:
   get-version:
     runs-on: ubuntu-latest
 
     permissions:
       contents: write
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+        with:
+          token: ${{ secrets.REPO_SCOPED_TOKEN }}
+          ref: main
 
       - name: Fetch release version
         run: |
@@ -31,5 +36,6 @@ jobs:
         run: |
           git config --global user.name 'Benjamin Brummer'
           git config --global user.email 'info@benjamin-brummer.de'
-          git commit -am "$(cat version.txt)"
-          git push
+          git add version.txt
+          git commit -m "$(cat version.txt)"
+          git push origin main
